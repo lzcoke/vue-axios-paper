@@ -13,7 +13,7 @@
               <img v-lazy="'https://sonshop.oss-cn-hangzhou.aliyuncs.com/icon/icon_user_avatar.png'" alt="">
             </div>
             <div class="nickname">
-              <h2>我爱喝可乐</h2>
+              <h2 v-text="userInfo.nickname"></h2>
             </div>
             <div class="detail">
               <span>男</span>
@@ -35,26 +35,30 @@
             <h3>历史记录</h3>
           </div>
           <div class="list">
-            <div v-for="item in 15" class="nav">
-              <div class="name">
-                <p>2020年春季数学试卷一.pdf</p>
-              </div>
-              <div class="tool">
-                <div class="view">
-                  <button>在线查看</button>
+            <div v-if="list.length>0">
+              <div v-for="item in list" class="nav">
+                <div class="name">
+                  <p v-text="item.paper.paper_name"></p>
                 </div>
-                <div class="collect">
-                  <button>取消收藏</button>
+                <div class="tool">
+                  <div class="view">
+                    <button>在线查看</button>
+                  </div>
                 </div>
               </div>
             </div>
+            <div v-else class="table-note">
+              <p>暂无试卷信息，请重新 <a href="/home">查找你要的试卷</a> !</p>
+            </div>
+
           </div>
           <div class="page">
             <el-pagination
               :page-size="20"
               :pager-count="11"
+              :hide-on-single-page="true"
               layout="prev, pager, next"
-              :total="1000">
+              :total="total">
             </el-pagination>
           </div>
         </div>
@@ -66,6 +70,7 @@
 <script>
 import HeadInformation from "@/components/HeadInformation";
 import NavBar from "@/components/NavBar";
+import { getPaperPage, paperViewpage } from "@/assets/js/table/Paper";
 
 export default {
   name: "Home",
@@ -74,7 +79,41 @@ export default {
     NavBar
   },
   data() {
-    return {};
+    return {
+      list: [],
+      total: 0,
+      pagePagination: {
+        page: 1,
+        limit: 10
+      }
+    };
+  },
+  created() {
+    this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+    this.init();
+  },
+  methods: {
+    init() {
+      this.getPaperView();
+    },
+    getPaperView() {
+      let pagePagination = {
+        page: this.pagePagination.page,
+        limit: this.pagePagination.limit,
+        userId: this.userInfo.user_id
+      };
+      paperViewpage(pagePagination).then(res => {
+        if (res.code === 200) {
+          this.list = res.data.list;
+          this.total = res.data.total;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    load() {
+      this.$router.push("/");
+    }
   }
 };
 </script>
@@ -288,6 +327,21 @@ export default {
         width: 100%;
         margin-top: 10px;
         overflow: hidden;
+
+        .table-note {
+          margin-top: 50px;
+          text-align: center;
+
+          p {
+            color: #f1f1f1;
+
+            font-size: 20px;
+
+            a {
+              color: #ffffff;
+            }
+          }
+        }
 
         .nav {
           padding: 10px 0;

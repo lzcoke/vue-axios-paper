@@ -1,5 +1,9 @@
-import { get, post } from "@/assets/js/axios";
+import request from "@/assets/js/Request";
 
 export function login(data) {
-  return post("/login", data);
+  return request({
+    url: "/login",
+    method: "post",
+    data
+  });
 }

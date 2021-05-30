@@ -13,7 +13,7 @@
               <img v-lazy="'https://sonshop.oss-cn-hangzhou.aliyuncs.com/icon/icon_user_avatar.png'" alt="">
             </div>
             <div class="nickname">
-              <h2>我爱喝可乐</h2>
+              <h2 v-text="userInfo.nickname"></h2>
             </div>
             <div class="detail">
               <span>男</span>
@@ -35,25 +35,31 @@
             <h3>我的收藏</h3>
           </div>
           <div class="list">
-            <div v-for="item in 15" class="nav">
-              <div class="name">
-                <p>2020年春季数学试卷一.pdf</p>
-              </div>
-              <div class="tool">
-                <div class="view">
-                  <button>在线查看</button>
+            <div v-if="list.length>0">
+              <div v-for="item in list" class="nav">
+                <div class="name">
+                  <p v-text="item.paper.paper_name"></p>
                 </div>
-                <div class="collect">
-                  <button>取消收藏</button>
+                <div class="tool">
+                  <div class="view">
+                    <button @click="paperView(item.paper)">在线查看</button>
+                  </div>
+                  <div class="collect">
+                    <button @click="cancelCollect(item.paper)">取消收藏</button>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div v-else class="table-note">
+              <p>你暂未收藏任何试卷信息，请前往 <a href="/search">查找你要的试卷</a> !</p>
             </div>
           </div>
           <div class="page">
             <el-pagination
+              :hide-on-single-page="true"
               background
               layout="prev, pager, next"
-              :total="1000">
+              :total="total">
             </el-pagination>
           </div>
         </div>
@@ -65,6 +71,7 @@
 <script>
 import HeadInformation from "@/components/HeadInformation";
 import NavBar from "@/components/NavBar";
+import { paperCancelCollect, paperCollectPage } from "@/assets/js/table/Paper";
 
 export default {
   name: "Home",
@@ -73,7 +80,60 @@ export default {
     NavBar
   },
   data() {
-    return {};
+    return {
+      list: [],
+      total: 0,
+      pagePagination: {
+        page: 1,
+        limit: 10
+      }
+    };
+  },
+  created() {
+    this.userInfo = JSON.parse(sessionStorage.getItem("userInfo"));
+    console.log(this.userInfo)
+    this.init();
+  },
+  methods: {
+    init() {
+      this.getPaperCollectPage();
+    },
+    load() {
+      this.$router.push("/");
+    },
+    paperView(event) {
+      window.open("/pdf/web/viewer.html?file=" + encodeURIComponent(event.paper_url));
+    },
+    getPaperCollectPage() {
+      const params = {
+        page: this.pagePagination.page,
+        limit: this.pagePagination.limit,
+        userId: this.userInfo.user_id
+      };
+      paperCollectPage(params).then(res => {
+        if (res.code === 200) {
+          this.list = res.data.list;
+          this.total = res.data.total;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    cancelCollect(event) {
+      const params = {
+        userId: this.userInfo.user_id,
+        paperId: event.paper_id
+      };
+      paperCancelCollect(params).then(res => {
+        if (res.code === 200) {
+          this.$message.success("已取消");
+          this.init();
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+
+    }
   }
 };
 </script>
@@ -89,10 +149,10 @@ export default {
     display: flex;
     position: absolute;
     z-index: 1;
-    left: 0px;
-    top: 0px;
-    right: 0px;
-    bottom: 0px;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     background: url('https://lz-forum.oss-cn-hangzhou.aliyuncs.com/image/temp1.png') no-repeat center top #000;
     background-size: cover;
   }
@@ -181,7 +241,6 @@ export default {
           height: 48px;
           font-size: 16px;
           line-height: 48px;
-          text-align: center;
           color: #787d82;
           padding-left: 54px;
           text-align: left;
@@ -284,13 +343,27 @@ export default {
         }
       }
 
+      .table-note {
+        margin-top: 50px;
+        text-align: center;
+
+        p {
+          color: #777777;
+          font-size: 20px;
+
+          a {
+            color: #3457a5;
+          }
+        }
+      }
+
       .list {
         width: 100%;
         margin-top: 10px;
         overflow: hidden;
 
         .nav {
-          padding: 10px 0px;
+          padding: 10px 0;
           width: 100%;
           box-sizing: border-box;
           overflow: hidden;
@@ -314,7 +387,7 @@ export default {
 
               button {
                 background: transparent;
-                border: 0px;
+                border: 0;
                 font-size: 14px;
                 color: #545c63;
                 cursor: pointer;
@@ -327,7 +400,7 @@ export default {
 
               button {
                 background: transparent;
-                border: 0px;
+                border: 0;
                 font-size: 14px;
                 color: #545c63;
                 cursor: pointer;

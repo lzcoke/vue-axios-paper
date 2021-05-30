@@ -2,11 +2,21 @@
   <div class="header">
     <div class="logo">
       <a href="/">
-        <img src="https://sonshop.oss-cn-hangzhou.aliyuncs.com/logo/logo.png" alt="">
+        <img src="https://weixuewebchat.oss-cn-hangzhou.aliyuncs.com/banner/logo.png" alt="">
       </a>
     </div>
     <div class="menu">
+      <div class="user" v-if="userInfo">
+        <a href="/user">
+          <img :src="userInfo.avatar">
+        </a>
+      </div>
       <div class="list">
+        <div class="nav" v-if="userInfo == null">
+          <a @click="onLogin">
+            <p>登录</p>
+          </a>
+        </div>
         <div class="nav">
           <a href="/">
             <p>查询</p>
@@ -17,17 +27,14 @@
             <p>记录</p>
           </a>
         </div>
-        <div class="nav">
-          <a @click="onLogin">
-            <p>登录 / 注册</p>
+        <div class="nav" v-if="userInfo">
+          <a @click="LogOut">
+            <p>注销</p>
           </a>
         </div>
+
       </div>
-      <!--      <div class="user">-->
-      <!--        <a href="">-->
-      <!--          <img src="https://sonshop.oss-cn-hangzhou.aliyuncs.com/icon/icon_user_avatar.png">-->
-      <!--        </a>-->
-      <!--      </div>-->
+
     </div>
     <!--登录弹窗-->
     <div class="template" v-show="login" @touchmove.prevent>
@@ -73,15 +80,35 @@ export default {
       login: false,
       form: {
         name: "",
-        email: "",
-        password: ""
-      }
+        email: "lzcoke@163.com",
+        password: "123456"
+      },
+      userInfo: null
     };
   },
+  created() {
+    let userInfo = sessionStorage.getItem("userInfo");
+    if (userInfo) {
+      this.userInfo = JSON.parse(userInfo);
+    }
+  },
   methods: {
+    LogOut() {
+      sessionStorage.clear();
+      this.$parent.load();
+    },
     onSubmit() {
-      login({ email: "lzcoke@163.com", password: "123456" }).then(res => {
-        console.log(res);
+
+      login(this.form).then(res => {
+        if (res.code === 200) {
+          this.$message.success("登录成功");
+          this.login = false;
+          sessionStorage.setItem("token", res.data.token);
+          sessionStorage.setItem("userInfo", JSON.stringify(res.data.user));
+          this.userInfo = res.data.user;
+        } else {
+          this.$message.error(res.message);
+        }
       });
     },
     onLogin() {
@@ -116,7 +143,7 @@ export default {
     height: 100%;
 
     img {
-      height: 20px;
+      height: 25px;
     }
   }
 
@@ -128,6 +155,7 @@ export default {
 
     .list {
       float: left;
+      margin-left: 30px;
 
       .nav {
         float: left;

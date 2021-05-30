@@ -11,12 +11,12 @@
         <el-row class="list">
           <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
             <div class="nav">
-              <el-select v-model="value" placeholder="请选择">
+              <el-select @change="categoryChange" v-model="searchFrom.categoryId" placeholder="请选择">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in categoryFirst"
+                  :key="item.category_id"
+                  :label="item.category_name"
+                  :value="item.category_id">
                 </el-option>
               </el-select>
             </div>
@@ -24,12 +24,12 @@
           <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1"></el-col>
           <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
             <div class="nav">
-              <el-select v-model="value" placeholder="请选择">
+              <el-select v-model="searchFrom.secondId" @change="secondChange" placeholder="请选择">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in categorySecond"
+                  :key="item.second_id"
+                  :label="item.second_name"
+                  :value="item.second_id">
                 </el-option>
               </el-select>
             </div>
@@ -37,12 +37,12 @@
           <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1"></el-col>
           <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
             <div class="nav">
-              <el-select v-model="value" placeholder="请选择">
+              <el-select v-model="searchFrom.threeId" @change="threeChange" placeholder="请选择">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in categoryThree"
+                  :key="item.three_id"
+                  :label="item.three_name"
+                  :value="item.three_id">
                 </el-option>
               </el-select>
             </div>
@@ -50,12 +50,12 @@
           <el-col :xs="1" :sm="1" :md="1" :lg="1" :xl="1"></el-col>
           <el-col :xs="4" :sm="4" :md="4" :lg="4" :xl="4">
             <div class="nav">
-              <el-select v-model="value" placeholder="请选择">
+              <el-select v-model="searchFrom.fourId" placeholder="请选择">
                 <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
+                  v-for="item in categoryFour"
+                  :key="item.four_id"
+                  :label="item.four_name"
+                  :value="item.four_id">
                 </el-option>
               </el-select>
             </div>
@@ -95,6 +95,7 @@
 
 <script>
 import HeadInformation from "@/components/HeadInformation";
+import { categoryFirst, categoryFour, categorySecond, categoryThree } from "@/assets/js/table/category";
 
 export default {
   name: "Home",
@@ -103,28 +104,88 @@ export default {
   },
   data() {
     return {
-      options: [{
-        value: "选项1",
-        label: "黄金糕"
-      }, {
-        value: "选项2",
-        label: "双皮奶"
-      }, {
-        value: "选项3",
-        label: "蚵仔煎"
-      }, {
-        value: "选项4",
-        label: "龙须面"
-      }, {
-        value: "选项5",
-        label: "北京烤鸭"
-      }],
-      value: ""
+      categoryFirst: [],
+      categorySecond: [],
+      categoryThree: [],
+      categoryFour: [],
+      searchFrom: {
+        categoryId: "",
+        secondId: "",
+        threeId: "",
+        fourId: ""
+      }
     };
   },
+  created() {
+    this.init();
+  },
+  mounted() {
+  },
   methods: {
+    init() {
+      this.getCategory();
+      this.getCategorySecond();
+      this.getCategoryThree();
+      this.getCategoryFour();
+    },
+    getCategory() {
+      categoryFirst({}).then(res => {
+        if (res.code === 200) {
+          this.categoryFirst = res.data.list;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    getCategorySecond() {
+      categorySecond(this.searchFrom).then(res => {
+        if (res.code === 200) {
+          this.categorySecond = res.data.list;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    getCategoryThree() {
+      categoryThree(this.searchFrom).then(res => {
+        if (res.code === 200) {
+          this.categoryThree = res.data.list;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    load() {
+      location.reload();
+    },
+    getCategoryFour() {
+      categoryFour(this.searchFrom).then(res => {
+        if (res.code === 200) {
+          this.categoryFour = res.data.list;
+        } else {
+          this.$message.warning("网络错误");
+        }
+      });
+    },
+    categoryChange(e) {
+      this.getCategorySecond();
+      this.getCategoryThree();
+      this.getCategoryFour();
+    },
+    secondChange(e) {
+      this.getCategoryThree();
+      this.getCategoryFour();
+    },
+    threeChange(e) {
+      this.getCategoryFour();
+    },
     search() {
-      this.$router.push("/Search");
+      sessionStorage.setItem("searchItem", JSON.stringify(this.searchFrom));
+      if (this.userInfo) {
+        this.$router.push("/Search");
+      } else {
+        this.$message.error("请先登录");
+      }
     }
   }
 };
@@ -132,10 +193,10 @@ export default {
 <style lang="scss">
 .home {
   position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: #ffffff;
 }
 
