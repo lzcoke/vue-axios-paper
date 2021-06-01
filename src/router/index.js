@@ -11,7 +11,7 @@ const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
   },
   {
     path: "/user",
@@ -19,8 +19,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import("../views/User.vue")
+    component: () => import("../views/User.vue"),
   },
   {
     path: "/history",
@@ -28,8 +27,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import("../views/History.vue")
+    component: () => import("../views/History.vue"),
   },
   {
     path: "/search",
@@ -37,14 +35,21 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import("../views/Search.vue")
+    component: () => import("../views/Search.vue"),
+  },
+  {
+    path: "/setting",
+    name: "Setting",
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import("../views/Setting.vue"),
   }
 ];
 
 const router = new VueRouter({
   mode: "history",
-  routes
+  routes,
 });
 
 // 导航守卫

@@ -17,7 +17,7 @@
       </a>
     </div>
     <div :class="selected == 2 ? 'nav setting active' : 'nav collect' ">
-      <a href="/User">
+      <a href="/Setting">
         <img
           :src="selected == 2 ? 'https://lz-forum.oss-cn-hangzhou.aliyuncs.com/icon/icon_user_csetting_selected.png' : 'https://lz-forum.oss-cn-hangzhou.aliyuncs.com/icon/icon_user_csetting.png' "
           alt="">
