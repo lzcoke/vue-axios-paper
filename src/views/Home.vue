@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <!-- 头部信息 -->
-    <HeadInformation></HeadInformation>
+    <HeadInformation @func="getMsgFormSon"></HeadInformation>
     <!-- 搜索内容 -->
     <div class="search">
       <div class="container">
@@ -117,6 +117,10 @@ export default {
     };
   },
   created() {
+    let userInfo = sessionStorage.getItem("userInfo");
+    if (userInfo) {
+      this.userInfo = userInfo;
+    }
     this.init();
   },
   mounted() {
@@ -167,6 +171,10 @@ export default {
         }
       });
     },
+    getMsgFormSon(data) {
+      this.userInfo = data;
+      console.log(this.userInfo);
+    },
     categoryChange(e) {
       this.getCategorySecond();
       this.getCategoryThree();
@@ -182,6 +190,7 @@ export default {
     search() {
       sessionStorage.setItem("searchItem", JSON.stringify(this.searchFrom));
       if (this.userInfo) {
+        console.log(this.userInfo);
         this.$router.push("/Search");
       } else {
         this.$message.error("请先登录");

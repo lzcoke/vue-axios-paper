@@ -248,6 +248,7 @@ export default {
       paperCollect(data).then(res => {
         if (res.code === 200) {
           this.$message.success("收藏成功");
+          this.getPaper();
         } else {
           this.$message.error(res.message);
         }
