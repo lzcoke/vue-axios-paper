@@ -49,7 +49,7 @@
               </el-input>
             </el-form-item>
             <el-form-item>
-              <el-input v-model="form.password" placeholder="请输入密码">
+              <el-input v-model="form.password" show-password placeholder="请输入密码">
                 <i slot="prefix" class="el-input__icon el-icon-lock"></i>
               </el-input>
             </el-form-item>
@@ -69,6 +69,7 @@
 <script>
 
 import { login } from "@/assets/js/api";
+import md5 from "js-md5";
 
 export default {
   name: "HeadInformation",
@@ -80,8 +81,8 @@ export default {
       login: false,
       form: {
         name: "",
-        email: "lzcoke@163.com",
-        password: "123456"
+        email: "",
+        password: ""
       },
       userInfo: null
     };
@@ -98,19 +99,24 @@ export default {
       this.$parent.load();
     },
     onSubmit() {
-
-      login(this.form).then(res => {
+      const form = {
+        email: this.form.email,
+        password: md5(this.form.password)
+      };
+      login(form).then(res => {
         if (res.code === 200) {
           this.$message.success("登录成功");
           this.login = false;
           sessionStorage.setItem("token", res.data.token);
           sessionStorage.setItem("userInfo", JSON.stringify(res.data.user));
           this.userInfo = res.data.user;
+          this.$emit("func", this.userInfo);
         } else {
           this.$message.error(res.message);
         }
       });
     },
+
     onLogin() {
       this.login = true;
     },
